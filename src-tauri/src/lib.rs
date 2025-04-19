@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write};
+use std::fs::File;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -8,10 +8,15 @@ fn greet(name: &str) -> String {
 
 #[tauri::command]
 fn parse_image(image: Vec<u8>) -> Result<(), String> {
-    let img = image::load_from_memory(&image).map_err(|e| e.to_string())?;
+    let img: image::DynamicImage = image::load_from_memory(&image).map_err(|e| e.to_string())?;
 
-    let mut file = File::create("image.txt").map_err(|e| e.to_string())?;
-    file.write_all(img.as_bytes()).map_err(|e| e.to_string())?;
+    let mut file = File::create("image.png").map_err(|e| e.to_string())?;
+    img.write_to(&mut file, image::ImageFormat::Png)
+        .map_err(|e| e.to_string())?;
+
+    let absolute_path = std::fs::canonicalize("image.png").map_err(|e| e.to_string())?;
+
+    println!("Created file at: {}", absolute_path.display());
 
     Ok(())
 }

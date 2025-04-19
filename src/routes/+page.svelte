@@ -24,37 +24,43 @@
 		}
 
 		video.srcObject = stream;
-		video.play();
-		canvas.width = video.videoWidth;
-		canvas.height = video.videoHeight;
-		const ctx = canvas.getContext('2d');
 
-		if (!ctx) {
-			console.error('Canvas context not found');
-			return;
-		}
-		// Draw a frame and get image data
-		ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-		canvas.toBlob(
-			async (blob) => {
-				// `blob` is a binary representation of the canvas image
-				// You can now send this blob to your backend, save it, or process it further
-				if (!blob) {
-					console.error('Canvas toBlob failed');
-					return;
-				}
+		video.onloadedmetadata = async () => {
+			video.play();
 
-				// Convert Blob to ArrayBuffer, then to Uint8Array
-				const arrayBuffer = await blob.arrayBuffer();
-				const uint8Array = new Uint8Array(arrayBuffer);
+			canvas.width = video.videoWidth;
+			canvas.height = video.videoHeight;
+			const ctx = canvas.getContext('2d');
 
-				await invoke('parse_image', {
-					image: Array.from(uint8Array),
-				});
-			},
-			'image/png', // MIME type (optional, defaults to 'image/png')
-			1.0 // Quality (optional, only for lossy formats like 'image/jpeg')
-		); // or use canvas.toBlob for binary
+			if (!ctx) {
+				console.error('Canvas context not found');
+				return;
+			}
+
+			// Optionally, wait for the video to be able to play
+			video.oncanplay = () => {
+				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+				canvas.toBlob(
+					async (blob) => {
+						if (!blob) {
+							console.error('Canvas toBlob failed');
+							return;
+						}
+
+						const arrayBuffer = await blob.arrayBuffer();
+						const uint8Array = new Uint8Array(arrayBuffer);
+
+						const response = await invoke('parse_image', {
+							image: Array.from(uint8Array),
+						});
+
+						console.log(response);
+					},
+					'image/png',
+					1.0
+				);
+			};
+		};
 	}
 </script>
 
