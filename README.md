@@ -14,6 +14,8 @@ Maintaining peak productivity while studying or working is tougher than ever - d
 
 According to Joynet's IP policy (see [here](https://enjoynet.co.jp/ip_policy/)), "The illustrated materials distributed by us can be used free of charge, whether by individuals or corporations, commercial or non-commercial" (Google Translated). Since this project is currently unmonetized and will remain unmonetized for the foreseeable future, this project makes all efforts to comply with their intellectual property policy. All rights belong to illustrator Pom and company Joynet.
 
+Menhera images taken from the r/menhera subreddit ([here](https://www.reddit.com/r/menhera/comments/14w5bq7/leak_menherachan_hub_emote_archives/))
+
 ## Installation & Usage
 
 ### Environment Setup
