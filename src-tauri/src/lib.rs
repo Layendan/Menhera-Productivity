@@ -41,7 +41,7 @@ impl Menhera {
             history: VecDeque::with_capacity(HISTORY_SIZE), // History of user states
             is_distracted: false,                           // Current user state
             time_in_curr_state: 0,                          // Time spent in current user state
-            model: CModule.load("/resources/model.pt").unwrap(),
+            model: CModule::load("/resources/model.pt").unwrap(),
         }
     }
 
@@ -74,18 +74,18 @@ impl Menhera {
     }
 
     // Returns an iterator over the history
-    fn get_history(&self) -> impl Iterator<Item = bool> {
+    fn get_history(&self) -> impl Iterator<Item = &bool> {
         self.history.iter()
     }
 
     // Returns user current state
     fn get_is_distracted(&self) -> bool {
-        &self.is_distracted
+        self.is_distracted
     }
 
     // Returns the timer value
     fn get_timer(&self) -> usize {
-        &self.time_in_curr_state
+        self.time_in_curr_state
     }
 }
 
@@ -144,14 +144,16 @@ async fn parse_image(app: tauri::AppHandle, image: Vec<u8>) -> Result<State, Str
 
     // TODO: Get AI classifier result (ResNet?)
     let img = imagenet::load_image_and_resize224_from_memory(&image).map_err(|e| e.to_string())?;
-    let menhera = app.state::<Mutex<Menhera>>().lock().unwrap();
+    let mutex_ref = app.state::<Mutex<Menhera>>();
+    let mut menhera = mutex_ref.lock().unwrap();
+    let input_tensor = img.unsqueeze(0);
     let output = menhera
         .model
-        .forward_ts(&[image.unsqueeze(0)])
+        .forward_ts(&[input_tensor])
         .map_err(|e| e.to_string())?
         .softmax(-1, tch::Kind::Float)
-        .argmax(1, False)
-        .int64_value(0);
+        .argmax(1, false)
+        .int64_value(&[0]);
 
     // Convert model output (0 or 1) to boolean
     let ai_result = output == 1;
@@ -162,7 +164,7 @@ async fn parse_image(app: tauri::AppHandle, image: Vec<u8>) -> Result<State, Str
     // Determine user's current state based on majority state of the history window
     let history = menhera.get_history();
     // if this is wrong I blame Claude; "majority will be true if there are more true values than false values in the queue"
-    let has_majority_true_values = history.iter().filter(|&&b| b).count() > history.len() / 2;
+    let has_majority_true_values = history.filter(|&&b| b).count() > menhera.history.len() / 2;
 
     // If current user state (history_majority) is different than previous,
     // reset timer and update variable storing user state (is_distracted)
@@ -177,7 +179,7 @@ async fn parse_image(app: tauri::AppHandle, image: Vec<u8>) -> Result<State, Str
     // Determine Menhera's expression (state) based on timer value
     let timer = menhera.get_timer();
     let distracted = menhera.get_is_distracted();
-    let next_state = State::Idle;
+    let mut next_state = State::Idle;
     if distracted {
         // DISTRACTED_INTERVALS[3] seconds distracted = Distracted4
         if timer >= DISTRACTED_INTERVALS[3] {
@@ -217,7 +219,8 @@ async fn parse_image(app: tauri::AppHandle, image: Vec<u8>) -> Result<State, Str
     // Otherwise default is just idle (above)
 
     // Increment timer
-    menhera.update_timer(menhera.get_timer() + 1);
+    let current_timer = menhera.get_timer();
+    menhera.update_timer(current_timer + 1);
 
     // Update Menhera state
     menhera.update_state(next_state);
