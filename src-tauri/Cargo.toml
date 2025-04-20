@@ -26,4 +26,5 @@ image = "0.25.6"
 tauri-plugin-fs = "2.2.1"
 tokio = "1.44.2"
 rand = "0.9.1"
+tauri-plugin-macos-permissions = "2.2.0"
 

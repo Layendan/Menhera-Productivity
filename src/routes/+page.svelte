@@ -3,9 +3,14 @@
 	import type { State } from '$lib';
 	import { emitTo } from '@tauri-apps/api/event';
 	import { getCurrentWindow } from '@tauri-apps/api/window';
+	import {
+		requestScreenRecordingPermission,
+		checkScreenRecordingPermission,
+	} from 'tauri-plugin-macos-permissions-api';
 
 	// Don't touch this, only use setIntervalId
 	let intervalId: number | null = $state(null);
+	let isAuthorizedState: Promise<boolean> = $state(checkScreenRecordingPermission());
 
 	function setIntervalId(id: number) {
 		if (intervalId !== null) {
@@ -72,12 +77,26 @@
 </script>
 
 <main class="container">
-	<button class="row" onclick={getDisplayMedia}> Get Display Media </button>
+	{#await isAuthorizedState then isAuthorized}
+		{#if isAuthorized}
+			<button class="row" onclick={getDisplayMedia}> Get Display Media </button>
+		{:else}
+			<button
+				class="row"
+				onclick={async () => {
+					await requestScreenRecordingPermission();
+					isAuthorizedState = checkScreenRecordingPermission();
+				}}
+			>
+				Request Display Media Permission
+			</button>
+		{/if}
+	{/await}
 
 	<!-- svelte-ignore a11y_media_has_caption -->
-	<video autoplay class="row"></video>
+	<video autoplay class="hidden"></video>
 
-	<canvas class="row"></canvas>
+	<canvas class="hidden"></canvas>
 </main>
 
 <style>
@@ -87,7 +106,7 @@
 		line-height: 24px;
 		font-weight: 400;
 
-		/* overflow: hidden; */
+		overflow: hidden;
 
 		color: #0f0f0f;
 		background-color: #f6f6f6;
