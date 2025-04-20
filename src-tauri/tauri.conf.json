@@ -22,6 +22,8 @@
         "label": "menhera",
         "width": 200,
         "height": 200,
+        "visibleOnAllWorkspaces": true,
+        "backgroundThrottling": "disabled",
         "resizable": false,
         "decorations": false,
         "transparent": true,

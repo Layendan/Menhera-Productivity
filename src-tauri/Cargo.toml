@@ -28,4 +28,7 @@ tokio = "1.44.2"
 rand = "0.9.1"
 tauri-plugin-macos-permissions = "2.2.0"
 tch = "0.19.0"
+tauri-plugin-positioner = { version = "2.0.0", features = ["tray-icon"] }
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 

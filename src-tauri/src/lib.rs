@@ -2,6 +2,7 @@ use serde::Serialize;
 use std::collections::VecDeque;
 use std::sync::Mutex;
 use tauri::Manager;
+use tauri_plugin_positioner::{Position, WindowExt};
 use tch::vision::imagenet;
 use tch::CModule;
 
@@ -185,13 +186,19 @@ async fn parse_image(app: tauri::AppHandle, image: Vec<u8>) -> Result<State, Str
 
 #[tauri::command]
 async fn open_menhera(app: tauri::AppHandle) -> Result<(), String> {
-    tauri::WebviewWindowBuilder::from_config(
+    let window = tauri::WebviewWindowBuilder::from_config(
         &app,
         &app.config().app.windows.get(1).unwrap().clone(),
     )
     .unwrap()
     .build()
     .unwrap();
+
+    window
+        .as_ref()
+        .window()
+        .move_window(Position::BottomRight)
+        .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -203,7 +210,22 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_macos_permissions::init())
+        .plugin(tauri_plugin_positioner::init())
         .invoke_handler(tauri::generate_handler![parse_image, open_menhera])
+        .setup(|app| {
+            #[cfg(desktop)]
+            {
+                app.handle()
+                    .plugin(tauri_plugin_positioner::init())
+                    .expect("failed to initialize positioner plugin");
+                tauri::tray::TrayIconBuilder::new()
+                    .on_tray_icon_event(|tray_handle, event| {
+                        tauri_plugin_positioner::on_tray_event(tray_handle.app_handle(), &event);
+                    })
+                    .build(app)?;
+            }
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
