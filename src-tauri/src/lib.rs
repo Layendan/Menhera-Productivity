@@ -128,6 +128,7 @@ pub fn run() {
         .manage(Mutex::new(Menhera::new()))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_macos_permissions::init())
         .invoke_handler(tauri::generate_handler![parse_image, open_menhera])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
