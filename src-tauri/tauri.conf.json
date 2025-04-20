@@ -14,7 +14,8 @@
       {
         "title": "menhera-productivity",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "acceptFirstMouse": true
       },
       {
         "title": "menhera",
@@ -46,6 +47,14 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
+    ],
+    "macOS": {
+      "entitlements": "Release.entitlements",
+      "exceptionDomain": "",
+      "frameworks": []
+    },
+    "resources": [
+      "resources/**/*"
     ]
   }
 }
