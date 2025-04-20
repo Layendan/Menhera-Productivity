@@ -4,7 +4,7 @@ import time
 import os
 import sys
 
-# CHANGE THIS TO DETERMINE WHAT IMAGE WE ARE SAVING
+# CHANGE THIS TO LABEL THE IMAGE DATA WE ARE SAVING
 IS_DISTRACTED = True
 
 base_dir = "dataset"
