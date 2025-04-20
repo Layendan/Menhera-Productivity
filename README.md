@@ -28,6 +28,37 @@ Follow this page to install Tauri: https://v2.tauri.app/start/prerequisites
 
 Then follow this page to install pnpm: https://pnpm.io/installation
 
+#### Installing Torch Dependencies
+
+Follow the instructions in the [tch-rs](https://github.com/LaurentMazare/tch-rs/tree/main) repository to install the necessary dependencies for your operating system. Under is a summary of the installation process for each operating system.
+
+##### Windows
+
+1. Download LibTorch from [PyTorch](https://pytorch.org/get-started/locally/)
+
+    - Stable (2.6.0)
+    - Windows
+    - LibTorch
+    - C++/Java
+    - CUDA 11.8
+
+2. Unzip downloaded file
+3. Enter environment variables
+    - Create `LIBTORCH` and assign `X:\path\to\libtorch`
+    - Add `X:\path\to\libtorch\lib` to the `Path` variable
+4. Restart device
+
+##### MacOS M1-M4 Chips
+
+Install the dependencies using pip and symlink the libtorch library (based on [this comment](https://github.com/LaurentMazare/tch-rs/issues/488#issuecomment-1825404820)):
+
+```sh
+python3 -m pip install torch==2.6.0
+export LIBTORCH_USE_PYTORCH=1
+sudo cp <your_python_site_package_path>/torch/lib/lib** /usr/local/lib
+cargo run
+```
+
 ### Recommended IDE Setup
 
 [VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
