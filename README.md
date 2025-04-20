@@ -34,8 +34,14 @@ Then follow this page to install pnpm: https://pnpm.io/installation
 
 ## Building the Project
 
-Build the project by running
+First, install the project dependencies using pnpm:
 
+```sh
+pnpm install
 ```
+
+Then build the project by running:
+
+```sh
 pnpm tauri dev
 ```

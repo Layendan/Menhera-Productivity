@@ -1,14 +1,7 @@
 <script lang="ts">
 	import { invoke } from '@tauri-apps/api/core';
-
-	let name = $state('');
-	let greetMsg = $state('');
-
-	async function greet(event: Event) {
-		event.preventDefault();
-		// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-		greetMsg = await invoke('greet', { name });
-	}
+	import type { State } from '$lib';
+	import { emitTo } from '@tauri-apps/api/event';
 
 	async function getDisplayMedia() {
 		const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -38,70 +31,65 @@
 			}
 
 			// Optionally, wait for the video to be able to play
-			video.oncanplay = () => {
-				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-				canvas.toBlob(
-					async (blob) => {
-						if (!blob) {
-							console.error('Canvas toBlob failed');
-							return;
-						}
+			video.oncanplay = async () => {
+				const interval = setInterval(() => {
+					console.debug('Taking screenshot');
+					ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+					console.debug('Screenshot taken');
+					canvas.toBlob(
+						async (blob) => {
+							console.debug('Converting canvas to blob');
+							if (!blob) {
+								console.error('Canvas toBlob failed');
+								return;
+							}
 
-						const arrayBuffer = await blob.arrayBuffer();
-						const uint8Array = new Uint8Array(arrayBuffer);
+							console.debug('Converting blob to ArrayBuffer');
 
-						const response = await invoke('parse_image', {
-							image: Array.from(uint8Array),
-						});
+							const arrayBuffer = await blob.arrayBuffer();
+							const uint8Array = new Uint8Array(arrayBuffer);
 
-						console.log(response);
-					},
-					'image/png',
-					1.0
-				);
+							const state = await invoke<State>('parse_image', {
+								image: Array.from(uint8Array),
+							});
+
+							console.debug(state);
+							emitTo('menhera', 'menhera_state', {
+								state,
+							});
+						},
+						'image/png',
+						1.0
+					);
+				}, 1000);
+
+				video.onpause = () => {
+					clearInterval(interval);
+				};
+				video.onended = () => {
+					clearInterval(interval);
+				};
+				video.onerror = () => {
+					clearInterval(interval);
+				};
+
+				await invoke('open_menhera');
+				// await getCurrentWindow().minimize();
 			};
 		};
 	}
 </script>
 
 <main class="container">
-	<h1>Welcome to Tauri + Svelte</h1>
-
-	<div class="row">
-		<a href="https://vitejs.dev" target="_blank">
-			<img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-		</a>
-		<a href="https://tauri.app" target="_blank">
-			<img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-		</a>
-		<a href="https://kit.svelte.dev" target="_blank">
-			<img src="/svelte.svg" class="logo svelte-kit" alt="SvelteKit Logo" />
-		</a>
-	</div>
-	<p>Click on the Tauri, Vite, and SvelteKit logos to learn more.</p>
-
-	<form class="row" onsubmit={greet}>
-		<input id="greet-input" placeholder="Enter a name..." bind:value={name} />
-		<button type="submit">Greet</button>
-	</form>
-	<p>{greetMsg}</p>
-
 	<button class="row" onclick={getDisplayMedia}> Get Display Media </button>
 
-	<video autoplay></video>
+	<!-- svelte-ignore a11y_media_has_caption -->
+	<video autoplay class="hidden"></video>
 
-	<canvas></canvas>
+	<canvas class="hidden"></canvas>
 </main>
 
 <style>
-	.logo.vite:hover {
-		filter: drop-shadow(0 0 2em #747bff);
-	}
-
-	.logo.svelte-kit:hover {
-		filter: drop-shadow(0 0 2em #ff3e00);
-	}
-
 	:root {
 		font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
 		font-size: 16px;
@@ -120,22 +108,11 @@
 
 	.container {
 		margin: 0;
-		padding-top: 10vh;
+		height: 100vh;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
 		text-align: center;
-	}
-
-	.logo {
-		height: 6em;
-		padding: 1.5em;
-		will-change: filter;
-		transition: 0.75s;
-	}
-
-	.logo.tauri:hover {
-		filter: drop-shadow(0 0 2em #24c8db);
 	}
 
 	.row {
@@ -143,21 +120,10 @@
 		justify-content: center;
 	}
 
-	a {
-		font-weight: 500;
-		color: #646cff;
-		text-decoration: inherit;
+	.hidden {
+		display: none;
 	}
 
-	a:hover {
-		color: #535bf2;
-	}
-
-	h1 {
-		text-align: center;
-	}
-
-	input,
 	button {
 		border-radius: 8px;
 		border: 1px solid transparent;
@@ -183,13 +149,8 @@
 		background-color: #e8e8e8;
 	}
 
-	input,
 	button {
 		outline: none;
-	}
-
-	#greet-input {
-		margin-right: 5px;
 	}
 
 	@media (prefers-color-scheme: dark) {
@@ -198,11 +159,6 @@
 			background-color: #2f2f2f;
 		}
 
-		a:hover {
-			color: #24c8db;
-		}
-
-		input,
 		button {
 			color: #ffffff;
 			background-color: #0f0f0f98;

@@ -15,8 +15,23 @@
         "title": "menhera-productivity",
         "width": 800,
         "height": 600
+      },
+      {
+        "title": "menhera",
+        "label": "menhera",
+        "width": 200,
+        "height": 200,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "fullscreen": false,
+        "alwaysOnTop": true,
+        "create": false,
+        "url": "/menhera",
+        "acceptFirstMouse": true
       }
     ],
+    "macOSPrivateApi": true,
     "security": {
       "csp": null
     }
