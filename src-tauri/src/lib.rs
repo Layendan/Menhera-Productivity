@@ -6,10 +6,10 @@ use tauri_plugin_positioner::{Position, WindowExt};
 use tch::vision::imagenet;
 use tch::CModule;
 
-const HISTORY_SIZE: usize = 9; // number of polls
-const DISTRACTED_INTERVALS: [usize; 4] = [3, 6, 9, 12]; // number of polls
-const FOCUSED_INTERVALS: [usize; 4] = [3, 6, 9, 12]; // number of polls
-const FOCUS_INTERVAL: usize = 1; // number of polls
+const HISTORY_SIZE: usize = 7; // number of polls menhera will consider to determine whether or not you are being productive
+const DISTRACTED_INTERVALS: [usize; 4] = [3, 9, 15, 27]; // intervals (in number of polls) at which menhera will show upset animations 
+const FOCUSED_INTERVALS: [usize; 4] = [3, 9, 15, 27]; // intervals (in number of polls) at which menhera will show happy animations
+const FOCUS_INTERVAL: usize = 1; // number of polls that menhera will display a happy animation for
 
 #[derive(Debug, Serialize, Clone, Copy)]
 #[allow(dead_code)]
