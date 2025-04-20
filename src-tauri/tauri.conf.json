@@ -28,6 +28,7 @@
         "alwaysOnTop": true,
         "create": false,
         "url": "/menhera",
+        "shadow": false,
         "acceptFirstMouse": true
       }
     ],

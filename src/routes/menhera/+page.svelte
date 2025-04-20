@@ -2,11 +2,15 @@
 	import { State } from '$lib';
 	import { listen } from '@tauri-apps/api/event';
 
-	let state: State = $state(State.Unknown);
+	let state: string = $state(State.Unknown);
+	let derived: string = $derived(
+		state === State.Idle || state === State.Distracted1
+			? `/menhera_imgs/${state}.png`
+			: `/menhera_imgs/${state}.gif`
+	);
 
 	listen('menhera_state', (event) => {
 		const payload = event.payload as { state: State };
-		console.log(payload.state);
 		state = payload.state;
 	});
 
@@ -15,14 +19,7 @@
 
 <main class="main" data-tauri-drag-region>
 	{#if state}
-		<img
-			src="/menhera_imgs/{state}.gif"
-			alt=""
-			onerror={(e) => {
-				// If GIF fails to load, try PNG instead
-				(e.target as HTMLImageElement).src = `/menhera_imgs/${state}.png`;
-			}}
-		/>
+		<img src={derived} alt="" />
 	{/if}
 </main>
 

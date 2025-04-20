@@ -2,6 +2,17 @@
 	import { invoke } from '@tauri-apps/api/core';
 	import type { State } from '$lib';
 	import { emitTo } from '@tauri-apps/api/event';
+	import { getCurrentWindow } from '@tauri-apps/api/window';
+
+	// Don't touch this, only use setIntervalId
+	let intervalId: number | null = $state(null);
+
+	function setIntervalId(id: number) {
+		if (intervalId !== null) {
+			clearInterval(intervalId);
+		}
+		intervalId = id;
+	}
 
 	async function getDisplayMedia() {
 		const stream = await navigator.mediaDevices.getDisplayMedia({
@@ -18,65 +29,45 @@
 
 		video.srcObject = stream;
 
-		video.onloadedmetadata = async () => {
-			video.play();
+		await video.play();
 
-			canvas.width = video.videoWidth;
-			canvas.height = video.videoHeight;
-			const ctx = canvas.getContext('2d');
+		setIntervalId(
+			setInterval(() => {
+				canvas.width = video.videoWidth;
+				canvas.height = video.videoHeight;
+				const ctx = canvas.getContext('2d');
 
-			if (!ctx) {
-				console.error('Canvas context not found');
-				return;
-			}
+				if (!ctx) {
+					console.error('Canvas context not found');
+					return;
+				}
+				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+				canvas.toBlob(
+					async (blob) => {
+						if (!blob) {
+							console.error('Canvas toBlob failed');
+							return;
+						}
 
-			// Optionally, wait for the video to be able to play
-			video.oncanplay = async () => {
-				const interval = setInterval(() => {
-					console.debug('Taking screenshot');
-					ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-					console.debug('Screenshot taken');
-					canvas.toBlob(
-						async (blob) => {
-							console.debug('Converting canvas to blob');
-							if (!blob) {
-								console.error('Canvas toBlob failed');
-								return;
-							}
+						const arrayBuffer = await blob.arrayBuffer();
+						const uint8Array = new Uint8Array(arrayBuffer);
 
-							console.debug('Converting blob to ArrayBuffer');
+						const state = await invoke<State>('parse_image', {
+							image: Array.from(uint8Array),
+						});
 
-							const arrayBuffer = await blob.arrayBuffer();
-							const uint8Array = new Uint8Array(arrayBuffer);
+						emitTo('menhera', 'menhera_state', {
+							state,
+						});
+					},
+					'image/png',
+					1.0
+				);
+			}, 5000)
+		);
 
-							const state = await invoke<State>('parse_image', {
-								image: Array.from(uint8Array),
-							});
-
-							console.debug(state);
-							emitTo('menhera', 'menhera_state', {
-								state,
-							});
-						},
-						'image/png',
-						1.0
-					);
-				}, 1000);
-
-				video.onpause = () => {
-					clearInterval(interval);
-				};
-				video.onended = () => {
-					clearInterval(interval);
-				};
-				video.onerror = () => {
-					clearInterval(interval);
-				};
-
-				await invoke('open_menhera');
-				// await getCurrentWindow().minimize();
-			};
-		};
+		await invoke('open_menhera');
+		await getCurrentWindow().hide();
 	}
 </script>
 
@@ -84,9 +75,9 @@
 	<button class="row" onclick={getDisplayMedia}> Get Display Media </button>
 
 	<!-- svelte-ignore a11y_media_has_caption -->
-	<video autoplay class="hidden"></video>
+	<video autoplay class="row"></video>
 
-	<canvas class="hidden"></canvas>
+	<canvas class="row"></canvas>
 </main>
 
 <style>
@@ -95,6 +86,8 @@
 		font-size: 16px;
 		line-height: 24px;
 		font-weight: 400;
+
+		/* overflow: hidden; */
 
 		color: #0f0f0f;
 		background-color: #f6f6f6;
