@@ -1,5 +1,9 @@
 # Menhera Productivity
 
+We like anime and we like productivity. So we put the two together to create
+
+![salmon](https://preview.redd.it/heian-era-sukuna-and-gojo-hitting-the-absolute-cinema-pose-v0-7w0nmpk3klge1.jpeg?width=1125&format=pjpg&auto=webp&s=0ff9981dd9f60c376b46e7c807ae2a8a97cdaec1)
+
 This project is a machine learning-supported productivity application built using Tauri, SvelteKit, and PyTorch. Programmed using Rust and TypeScript, along with Python for training a machine learning model.
 
 Project submission for Innovation Hacks 2025 Hackathon GDSC challenge.
