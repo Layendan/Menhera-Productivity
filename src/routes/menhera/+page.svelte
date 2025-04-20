@@ -17,22 +17,6 @@
 	});
 
 	$inspect(state);
-
-	onMount(async () => {
-		const menu = await Menu.new({
-			items: [
-				await MenuItem.new({
-					id: 'menhera',
-					text: 'Menhera',
-					enabled: false,
-				}),
-				await PredefinedMenuItem.new({ item: 'Separator' }),
-				await PredefinedMenuItem.new({ item: 'Quit' }),
-			],
-		});
-
-		await menu.setAsAppMenu();
-	});
 </script>
 
 <main
