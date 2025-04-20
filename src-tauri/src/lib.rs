@@ -1,4 +1,3 @@
-use rand::Rng;
 use serde::Serialize;
 use std::collections::VecDeque;
 use std::sync::Mutex;
@@ -41,7 +40,7 @@ impl Menhera {
             history: VecDeque::with_capacity(HISTORY_SIZE), // History of user states
             is_distracted: false,                           // Current user state
             time_in_curr_state: 0,                          // Time spent in current user state
-            model: CModule::load("/resources/model.pt").unwrap(),
+            model: CModule::load("resources/model.pt").unwrap(),
         }
     }
 
@@ -68,11 +67,6 @@ impl Menhera {
         self.time_in_curr_state = timer;
     }
 
-    // Returns Menhera current state
-    fn get_state(&self) -> &State {
-        &self.current_state
-    }
-
     // Returns an iterator over the history
     fn get_history(&self) -> impl Iterator<Item = &bool> {
         self.history.iter()
@@ -91,48 +85,6 @@ impl Menhera {
 
 #[tauri::command]
 async fn parse_image(app: tauri::AppHandle, image: Vec<u8>) -> Result<State, String> {
-    println!("Parsing image...");
-    // This part still needs to be synchronous since image processing is CPU-bound
-    // let img: image::DynamicImage = image::load_from_memory(&image).map_err(|e| e.to_string())?;
-
-    println!("Image parsed");
-
-    // // Use async file operations
-    // let path = "../image.png";
-
-    // // Create a buffer in memory first
-    // let mut buffer = std::io::Cursor::new(Vec::new());
-    // img.write_to(&mut buffer, image::ImageFormat::Png)
-    //     .map_err(|e| e.to_string())?;
-
-    // // Write buffer to file asynchronously
-    // tokio::fs::write(path, buffer.into_inner())
-    //     .await
-    //     .map_err(|e| e.to_string())?;
-
-    // // Get absolute path (also async)
-    // let absolute_path = tokio::fs::canonicalize(path)
-    //     .await
-    //     .map_err(|e| e.to_string())?;
-
-    // println!("Created file at: {}", absolute_path.display());
-
-    // Simulate image processing by returning a random state
-    let mut rng = rand::rng();
-    let states = [
-        State::Idle,
-        State::Distracted1,
-        State::Distracted2,
-        State::Distracted3,
-        State::Distracted4,
-        State::Focused1,
-        State::Focused2,
-        State::Focused3,
-        State::Focused4,
-    ];
-    let random_state = states[rng.random_range(0..states.len())];
-    println!("Returning random state: {:?}", random_state);
-
     // #######################################
     // ### Determine next state of Menhera ###
     // #######################################
@@ -225,12 +177,15 @@ async fn parse_image(app: tauri::AppHandle, image: Vec<u8>) -> Result<State, Str
     // Update Menhera state
     menhera.update_state(next_state);
 
+    println!("State History Queue: {:?}", menhera.history);
+    println!("Next State: {}", next_state as u8);
+
     Ok(next_state)
 }
 
 #[tauri::command]
 async fn open_menhera(app: tauri::AppHandle) -> Result<(), String> {
-    let webview_window = tauri::WebviewWindowBuilder::from_config(
+    tauri::WebviewWindowBuilder::from_config(
         &app,
         &app.config().app.windows.get(1).unwrap().clone(),
     )
