@@ -3,10 +3,14 @@
   "identifier": "default",
   "description": "Capability for the main window",
   "windows": [
-    "main"
+    "main",
+    "menhera"
   ],
   "permissions": [
     "core:default",
+    "core:window:allow-hide",
+    "core:window:allow-create",
+    "core:window:allow-start-dragging",
     "opener:default",
     {
       "identifier": "fs:scope",
