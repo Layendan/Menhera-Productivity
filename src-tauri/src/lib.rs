@@ -5,10 +5,10 @@ use tauri::Manager;
 use tch::vision::imagenet;
 use tch::CModule;
 
-const HISTORY_SIZE: usize = 15; // number of polls
-const DISTRACTED_INTERVALS: [usize; 4] = [15, 30, 45, 60]; // number of polls
-const FOCUSED_INTERVALS: [usize; 4] = [15, 30, 45, 60]; // number of polls
-const FOCUS_INTERVAL: usize = 2; // number of polls
+const HISTORY_SIZE: usize = 9; // number of polls
+const DISTRACTED_INTERVALS: [usize; 4] = [3, 6, 9, 12]; // number of polls
+const FOCUSED_INTERVALS: [usize; 4] = [3, 6, 9, 12]; // number of polls
+const FOCUS_INTERVAL: usize = 1; // number of polls
 
 #[derive(Debug, Serialize, Clone, Copy)]
 #[allow(dead_code)]
@@ -132,7 +132,7 @@ async fn parse_image(app: tauri::AppHandle, image: Vec<u8>) -> Result<State, Str
     let timer = menhera.get_timer();
     let distracted = menhera.get_is_distracted();
     let mut next_state = State::Idle;
-    if distracted {
+    if !distracted {
         // DISTRACTED_INTERVALS[3] seconds distracted = Distracted4
         if timer >= DISTRACTED_INTERVALS[3] {
             next_state = State::Distracted4;

@@ -68,7 +68,7 @@
 					'image/png',
 					1.0
 				);
-			}, 5000)
+			}, 2000)
 		);
 
 		await invoke('open_menhera');

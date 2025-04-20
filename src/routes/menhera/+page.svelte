@@ -2,6 +2,7 @@
 	import { State } from '$lib';
 	import { listen } from '@tauri-apps/api/event';
 	import { CheckMenuItem, Menu, MenuItem, PredefinedMenuItem } from '@tauri-apps/api/menu';
+	import { fade } from 'svelte/transition';
 
 	let stateValue: string = $state(State.Unknown);
 	let derived: string = $derived(
@@ -54,7 +55,7 @@
 	}}
 >
 	{#if stateValue && !(hideFocused && stateValue.startsWith('Focused')) && !(hideIdle && stateValue === State.Idle)}
-		<img src={derived} alt="" />
+		<img src={derived} alt="" transition:fade|global />
 	{/if}
 </main>
 
