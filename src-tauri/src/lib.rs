@@ -10,11 +10,11 @@ fn greet(name: &str) -> String {
 fn parse_image(image: Vec<u8>) -> Result<(), String> {
     let img: image::DynamicImage = image::load_from_memory(&image).map_err(|e| e.to_string())?;
 
-    let mut file = File::create("image.png").map_err(|e| e.to_string())?;
+    let mut file = File::create("../image.png").map_err(|e| e.to_string())?;
     img.write_to(&mut file, image::ImageFormat::Png)
         .map_err(|e| e.to_string())?;
 
-    let absolute_path = std::fs::canonicalize("image.png").map_err(|e| e.to_string())?;
+    let absolute_path = std::fs::canonicalize("../image.png").map_err(|e| e.to_string())?;
 
     println!("Created file at: {}", absolute_path.display());
 
