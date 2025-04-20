@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "menhera-productivity",
+  "productName": "Menhera Productivity",
   "version": "0.1.0",
   "identifier": "com.menhera-productivity.app",
   "build": {
@@ -12,13 +12,13 @@
   "app": {
     "windows": [
       {
-        "title": "menhera-productivity",
+        "title": "Menhera Productivity",
         "width": 800,
         "height": 600,
         "acceptFirstMouse": true
       },
       {
-        "title": "menhera",
+        "title": "Menhera",
         "label": "menhera",
         "width": 200,
         "height": 200,
