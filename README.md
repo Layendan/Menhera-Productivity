@@ -8,7 +8,8 @@ Menhera-chan (see [origin](#origin-of-menhera)) will sit in the corner of your s
 
 This project is a machine learning-supported productivity application built using Tauri, SvelteKit, and PyTorch. Programmed using Rust and TypeScript, along with Python for training a fine-tuned ResNet 18.
 
-Project submission for Innovation Hacks 2025 Hackathon GDSC challenge.
+Project submission for [Innovation Hacks 2025 Hackathon GDSC challenge](https://devpost.com/software/menhera-productivity).
+
 
 ## Topic: AI For Productivity
 
